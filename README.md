@@ -1,4 +1,4 @@
-Cheeta : A dummy wrapper for MailChimpm API (1.3)
+Cheeta : A dummy wrapper for MailChimp API (1.3)
 ========================================================
 
 Cheeta is a simple wrapper for MailChimp API (http://apidocs.mailchimp.com/1.3/). It uses mailsnake for the work behind the scenes. It doesn't cover all the API.
@@ -17,7 +17,6 @@ Usage:
 
     for email,data in c.get_list_members_detailed('d1677ca3f3',['tarzan@jungle.br','jane@jungle.br']):
         print email, data
-
     >> tarzan@jungle.br {u'status': u'subscribed', u'info_changed': u'2011-06-29 12:56:28', u'web_id': 123123,
     >> u'email_type': u'html', u'language': None, u'static_segments': [{u'added': u'2011-06-28 14:21:38', u'id': 169,
     >> u'name': u'The_Tarzan1309270897.11'}], u'merges': {u'REGION': u'Deep Jungle', u'BRANCH': u'The top one!',
