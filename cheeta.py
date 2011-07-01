@@ -13,7 +13,7 @@ class MailChimpAPIException(Exception):
 
 class Cheeta(object):
     """ Simple wrapper for MailChimp API (http://apidocs.mailchimp.com/1.3/)
-        It uses mailsnake for the work behind the scenes. It doesn't cover all
+        It uses mailsnake for the ork behind the scenes. It doesn't cover all
         the API.
     """
     DATE_REGEXP = re.compile(r'.*(time)|(date).*')
@@ -199,10 +199,7 @@ class Cheeta(object):
             if isinstance(call,dict):
                 errors.append(call['error'])
 
-        if not errors:
-            return True
-        else:
-            return errors
+        return errors if errors else True
 
     def test_campaign(self,campaign_id,test_emails):
         return self._parse_create_call(self._api_call('campaignSendTest',
