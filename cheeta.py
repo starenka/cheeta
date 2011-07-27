@@ -13,7 +13,7 @@ class MailChimpAPIException(Exception):
 
 class Cheeta(object):
     """ Simple wrapper for MailChimp API (http://apidocs.mailchimp.com/1.3/)
-        It uses mailsnake for the ork behind the scenes. It doesn't cover all
+        It uses mailsnake for the work behind the scenes. It doesn't cover all
         the API.
     """
     DATE_REGEXP = re.compile(r'.*(time)|(date).*')
@@ -106,7 +106,8 @@ class Cheeta(object):
         templates = self._parse_list_call(
                 self._api_call('templates'),key='id',data_key='user'
         )
-        id = re.match(self.PREVIEW_ID_REGEXP,templates[int(template_id)]['preview_image'])
+        preview_image = templates[int(template_id)].get('preview_image','') or ''
+        id = re.match(self.PREVIEW_ID_REGEXP,preview_image)
         if id:
             return 'http://us2.campaign-archive2.com/?u=%s&id=%s&e='%(id.group(1),campaign_id)
         else:
