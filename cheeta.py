@@ -29,6 +29,7 @@ class Cheeta(object):
     def _api_call(self,method,*args,**kwargs):
         if self.debug:
             print method,args,kwargs
+        #print method,args,kwargs
         try:
             return getattr(self.mailsnake,method)(*args,**kwargs)
         except Exception,e:
@@ -52,6 +53,8 @@ class Cheeta(object):
             raise MailChimpAPIException(response['error'])
         if data_key in response:
             for one in response[data_key]:
+                if key not in one:
+                    continue
                 parsed[one[key]] = self._parse_data_dict(one)
                 del(parsed[one[key]][key])
         else:
@@ -147,7 +150,8 @@ class Cheeta(object):
     def test_campaign_segment(self,list_id,options):
         return self._api_call('campaignSegmentTest',list_id=list_id,options=options)        
 
-    def create_campaign_from_static_segment(self,list_id,content,subject,from_email,from_name,members):
+    def create_campaign_from_static_segment(self,list_id,content,subject,from_email,from_name,members,
+                                            alternative_contents=None,generate_text=True):
         now = datetime.datetime.now()
         now_str = datetime.datetime.strftime(now,'Y-m-d H:M:S')
         seg_id = self.create_static_segment_w_members(  list_id=list_id,
@@ -167,13 +171,15 @@ class Cheeta(object):
                                                 'value':seg_id
                                             }],
                                             'match':'all'
-                                        }
+                                        },
+                                        alternative_contents=alternative_contents,
+                                        generate_text=generate_text
             ),seg_id
 
 
-    def create_campaign(self,content,type=None,**kwargs):
+    def create_campaign(self,content,type=None,alternative_contents=None,generate_text=True,**kwargs):
         """ 'list_id','subject','from_email','from_name' """
-        opts = ('list_id','subject','from_email','from_name')
+        opts = ('list_id','subject','from_email','from_name','generate_text')
         options = {}
         segment_opts = kwargs.get('segment_opts',{})
         type_opts = kwargs.get('type_opts',{})
@@ -183,13 +189,20 @@ class Cheeta(object):
                 options[n] = v
         type = type if type else self.DEFAULT_CAMPAIGN
 
+        content = {self.DEFAULT_CONTENT_TYPE:content}
+        if alternative_contents:
+            content.update(alternative_contents)
+            if 'text' in content:
+                generate_text = False
+
         return self._parse_create_call(
             self._api_call('campaignCreate',
                 type=type,
                 options=options,
-                content={self.DEFAULT_CONTENT_TYPE:content},
+                content=content,
                 segment_opts=segment_opts,
-                type_opts=type_opts
+                type_opts=type_opts,
+                generate_text=generate_text
             )
         )
 
@@ -215,3 +228,9 @@ class Cheeta(object):
     def has_template_placeholder(self,template_id,needle='{{ placeholder }}'):
         template = self.get_user_template(template_id)
         return needle in template['source']
+
+    def convert2text(self,content,type='html'):
+        call = self._api_call('generateText',type=type,content=content)
+        if isinstance(call,dict):
+            raise MailChimpAPIException(call['error'])
+        return call
